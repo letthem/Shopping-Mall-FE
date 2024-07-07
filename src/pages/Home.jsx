@@ -70,6 +70,7 @@ const BoxItem = styled.div`
   &:hover {
     background-color: #eeeeee;
   }
+  
   h4 {
     font-size: 2rem;
     font-weight: 400;
