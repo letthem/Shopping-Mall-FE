@@ -11,6 +11,9 @@ const Items = () => {
     itemPrice: "",
     stockQuantity: "",
   });
+  const [searchItemId, setSearchItemId] = useState("");
+  const [searchResult, setSearchResult] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // 전체 상품 리스트 조회 (get)
   const fetchItems = async () => {
@@ -47,6 +50,26 @@ const Items = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchItemId(e.target.value);
+  };
+
+  // 상품 조회하기 (get)
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMessage("");
+    setSearchResult(null);
+    try {
+      const response = await axiosInstance.get(`/items/${searchItemId}`);
+      setSearchResult(response.data);
+    } catch (e) {
+      setErrorMessage("등록된 상품 ID가 아닙니다.");
+      console.log(e);
+    }
+    setLoading(false);
+  };
+
   // 대기 중일 때 (아직 데이터를 받아오지 못한 경우)
   if (loading) {
     return <ItemsBlock>대기 중...</ItemsBlock>;
@@ -65,8 +88,37 @@ const Items = () => {
 
       <section>
         <h3>상품 조회하기</h3>
-        <input />
-        <button>상품 조회하기</button>
+        <form onSubmit={handleSearch}>
+          <input
+            placeholder="상품 ID"
+            value={searchItemId}
+            onChange={handleSearchChange}
+            required
+          />
+          <button type="submit">상품 조회하기</button>
+        </form>
+        {searchResult && (
+          <table style={{ marginTop: "30px" }}>
+            <thead>
+              <tr
+                style={{
+                  borderBottom: "2px solid gray",
+                  fontSize: "18px",
+                  lineHeight: "30px",
+                }}
+              >
+                <th>상품 ID</th>
+                <th>상품명</th>
+                <th>가격</th>
+                <th>수량</th>
+              </tr>
+            </thead>
+            <tbody>
+              <ItemList item={searchResult} />
+            </tbody>
+          </table>
+        )}
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
       </section>
 
       <section>
@@ -175,4 +227,10 @@ const Description = styled.p`
   font-size: 1.2rem;
   margin: 1.2rem 0;
   color: gray;
+`;
+
+const ErrorMessage = styled.p`
+  color: #ff6060;
+  margin-top: 10px;
+  font-size: 14px;
 `;
