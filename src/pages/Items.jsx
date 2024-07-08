@@ -31,6 +31,7 @@ const Items = () => {
     fetchItems();
   }, []);
 
+  // 상품 등록 input handle
   const handleChange = (e) => {
     setNewItem({
       ...newItem,
@@ -54,7 +55,7 @@ const Items = () => {
     setSearchItemId(e.target.value);
   };
 
-  // 상품 조회하기 (get)
+  // 상품 조회하기 (get) - path
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -75,7 +76,7 @@ const Items = () => {
     return <ItemsBlock>대기 중...</ItemsBlock>;
   }
 
-  // 아직 articles 값이 설정되지 않았을 때
+  // 아직 items 값이 설정되지 않았을 때
   if (!items) {
     return null;
   }
