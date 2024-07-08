@@ -236,8 +236,10 @@ const OrdersBlock = styled.div`
   }
 
   table {
-    width: 40rem;
+    width: 100%;
+    border-collapse: collapse;
     text-align: center;
+    margin-top: 20px;
   }
 
   thead {
