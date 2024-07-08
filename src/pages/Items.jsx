@@ -39,7 +39,7 @@ const Items = () => {
     });
   };
 
-  // 상품 등록하기 (post)
+  // 상품 등록 (post)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -55,7 +55,7 @@ const Items = () => {
     setSearchItemId(e.target.value);
   };
 
-  // 상품 조회하기 (get) - path
+  // 상품 id로 상품 조회 (get) - path
   const handleSearch = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -65,7 +65,7 @@ const Items = () => {
       const response = await axiosInstance.get(`/items/${searchItemId}`);
       setSearchResult(response.data);
     } catch (e) {
-      setErrorMessage("등록된 상품 ID가 아닙니다.");
+      setErrorMessage("존재하지 않는 상품 ID입니다.");
       console.log(e);
     }
     setLoading(false);
@@ -99,15 +99,9 @@ const Items = () => {
           <button type="submit">상품 조회하기</button>
         </form>
         {searchResult && (
-          <table style={{ marginTop: "30px" }}>
+          <table>
             <thead>
-              <tr
-                style={{
-                  borderBottom: "2px solid gray",
-                  fontSize: "18px",
-                  lineHeight: "30px",
-                }}
-              >
+              <tr>
                 <th>상품 ID</th>
                 <th>상품명</th>
                 <th>가격</th>
@@ -153,16 +147,10 @@ const Items = () => {
       </section>
 
       <section>
-        <h3 style={{ marginBottom: "20px" }}>전체 상품 리스트</h3>
+        <h3>전체 상품 리스트</h3>
         <table>
           <thead>
-            <tr
-              style={{
-                borderBottom: "2px solid gray",
-                fontSize: "18px",
-                lineHeight: "30px",
-              }}
-            >
+            <tr>
               <th>상품 ID</th>
               <th>상품명</th>
               <th>가격</th>
@@ -208,8 +196,16 @@ const ItemsBlock = styled.div`
   }
 
   table {
-    width: 40rem;
+    width: 100%;
+    border-collapse: collapse;
     text-align: center;
+    margin-top: 20px;
+  }
+
+  th {
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f4f4f4;
   }
 
   thead {

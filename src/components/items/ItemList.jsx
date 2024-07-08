@@ -16,12 +16,9 @@ const ItemList = ({ item }) => {
 
 const ItemListBlock = styled.tr`
   td {
-    padding: 1rem;
-    border-bottom: 1px solid #ddd;
-  }
-
-  &:not(:last-child) {
-    margin-bottom: 1rem;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
   }
 `;
 
