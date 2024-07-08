@@ -11,9 +11,16 @@ const Items = () => {
     itemPrice: "",
     stockQuantity: "",
   });
+  const [updateItem, setUpdateItem] = useState({
+    itemId: "",
+    itemName: "",
+    itemPrice: "",
+    stockQuantity: "",
+  });
   const [searchItemId, setSearchItemId] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [patchErrorMessage, setPatchErrorMessage] = useState("");
 
   // 전체 상품 리스트 조회 (get)
   const fetchItems = async () => {
@@ -71,6 +78,51 @@ const Items = () => {
     setLoading(false);
   };
 
+  // 상품 수정 input handle
+  const handleUpdateChange = (e) => {
+    setUpdateItem({
+      ...updateItem,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // 상품 수정 (patch)
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setPatchErrorMessage("");
+    try {
+      const response = await axiosInstance.patch(
+        `/items/${updateItem.itemId}`,
+        updateItem
+      );
+      setItems(
+        items.map((item) =>
+          item.id === response.data.id ? response.data : item
+        )
+      );
+      setUpdateItem({
+        itemId: "",
+        itemName: "",
+        itemPrice: "",
+        stockQuantity: "",
+      });
+    } catch (e) {
+      setPatchErrorMessage("존재하지 않는 상품 ID입니다.");
+      console.log(e);
+    }
+  };
+
+  // 상품 삭제 (delete)
+  const handleDelete = async (itemId) => {
+    try {
+      alert("해당 item이 삭제됩니다.");
+      await axiosInstance.delete(`/items/${itemId}`);
+      setItems(items.filter((item) => item.id !== itemId));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   // 대기 중일 때 (아직 데이터를 받아오지 못한 경우)
   if (loading) {
     return <ItemsBlock>대기 중...</ItemsBlock>;
@@ -106,10 +158,11 @@ const Items = () => {
                 <th>상품명</th>
                 <th>가격</th>
                 <th>수량</th>
+                <th>삭제</th>
               </tr>
             </thead>
             <tbody>
-              <ItemList item={searchResult} />
+              <ItemList item={searchResult} onDelete={handleDelete} />
             </tbody>
           </table>
         )}
@@ -147,6 +200,44 @@ const Items = () => {
       </section>
 
       <section>
+        <h3>상품 수정하기</h3>
+        <form onSubmit={handleUpdate}>
+          <input
+            name="itemId"
+            placeholder="상품 ID"
+            value={updateItem.itemId}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="itemName"
+            placeholder="상품명"
+            value={updateItem.itemName}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="itemPrice"
+            placeholder="가격"
+            value={updateItem.itemPrice}
+            onChange={handleUpdateChange}
+            type="number"
+            required
+          />
+          <input
+            name="stockQuantity"
+            placeholder="수량"
+            value={updateItem.stockQuantity}
+            onChange={handleUpdateChange}
+            type="number"
+            required
+          />
+          <button type="submit">상품 수정하기</button>
+        </form>
+        {patchErrorMessage && <ErrorMessage>{patchErrorMessage}</ErrorMessage>}
+      </section>
+
+      <section>
         <h3>전체 상품 리스트</h3>
         <table>
           <thead>
@@ -155,11 +246,12 @@ const Items = () => {
               <th>상품명</th>
               <th>가격</th>
               <th>수량</th>
+              <th>삭제</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <ItemList key={item.id} item={item} />
+              <ItemList key={item.id} item={item} onDelete={handleDelete} />
             ))}
           </tbody>
         </table>

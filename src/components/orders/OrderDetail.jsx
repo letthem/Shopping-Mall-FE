@@ -53,10 +53,6 @@ const OrderDetailBlock = styled.div`
   th {
     background-color: #f4f4f4;
   }
-
-  tr:hover {
-    background-color: #f1f1f1;
-  }
 `;
 
 export default OrderDetail;
