@@ -6,7 +6,13 @@ import { axiosInstance } from "../api";
 const Items = () => {
   const [items, setItems] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [newItem, setNewItem] = useState({
+    itemName: "",
+    itemPrice: "",
+    stockQuantity: "",
+  });
 
+  // 전체 상품 리스트 조회 (get)
   const fetchItems = async () => {
     setLoading(true);
     try {
@@ -21,6 +27,25 @@ const Items = () => {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  const handleChange = (e) => {
+    setNewItem({
+      ...newItem,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // 상품 등록하기 (post)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axiosInstance.post("/items", newItem);
+      setItems([...items, response.data]);
+      setNewItem({ itemName: "", itemPrice: "", stockQuantity: "" });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   // 대기 중일 때 (아직 데이터를 받아오지 못한 경우)
   if (loading) {
@@ -46,17 +71,45 @@ const Items = () => {
 
       <section>
         <h3>상품 등록하기</h3>
-        <input />
-        <input />
-        <input />
-        <button>상품 등록하기</button>
+        <form onSubmit={handleSubmit}>
+          <input
+            name="itemName"
+            placeholder="상품명"
+            value={newItem.itemName}
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="itemPrice"
+            placeholder="가격"
+            value={newItem.itemPrice}
+            onChange={handleChange}
+            type="number"
+            required
+          />
+          <input
+            name="stockQuantity"
+            placeholder="수량"
+            value={newItem.stockQuantity}
+            onChange={handleChange}
+            type="number"
+            required
+          />
+          <button type="submit">상품 등록하기</button>
+        </form>
       </section>
 
       <section>
         <h3 style={{ marginBottom: "20px" }}>전체 상품 리스트</h3>
         <table>
           <thead>
-            <tr style={{ borderBottom: "2px solid gray" }}>
+            <tr
+              style={{
+                borderBottom: "2px solid gray",
+                fontSize: "18px",
+                lineHeight: "30px",
+              }}
+            >
               <th>상품 ID</th>
               <th>상품명</th>
               <th>가격</th>
