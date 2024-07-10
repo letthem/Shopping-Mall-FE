@@ -14,9 +14,19 @@ const Members = () => {
       zipcode: "",
     },
   });
+  const [updateMember, setUpdateMember] = useState({
+    memberId: "",
+    memberName: "",
+    address: {
+      city: "",
+      street: "",
+      zipcode: "",
+    },
+  });
   const [searchMemberId, setSearchMemberId] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [patchErrorMessage, setPatchErrorMessage] = useState("");
 
   // 전체 사용자 리스트 조회 (get)
   const fetchMembers = async () => {
@@ -93,6 +103,66 @@ const Members = () => {
     setLoading(false);
   };
 
+  // 사용자 수정 input handle
+  const handleUpdateChange = (e) => {
+    const { name, value } = e.target;
+    if (name.startsWith("address.")) {
+      const key = name.split(".")[1];
+      setUpdateMember((prevMember) => ({
+        ...prevMember,
+        address: {
+          ...prevMember.address,
+          [key]: value,
+        },
+      }));
+    } else {
+      setUpdateMember({
+        ...updateMember,
+        [name]: value,
+      });
+    }
+  };
+
+  // 사용자 수정 (patch)
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setPatchErrorMessage("");
+    try {
+      const response = await axiosInstance.patch(
+        `/members/${updateMember.memberId}`,
+        updateMember
+      );
+      setMembers(
+        members.map((member) =>
+          member.id === response.data.id ? response.data : member
+        )
+      );
+      setUpdateMember({
+        memberId: "",
+        memberName: "",
+        address: {
+          city: "",
+          street: "",
+          zipcode: "",
+        },
+      });
+    } catch (e) {
+      setPatchErrorMessage("존재하지 않는 사용자 ID입니다.");
+      console.log("Server response:", e.response);
+    }
+  };
+
+  // 사용자 삭제 (delete)
+  const handleDelete = async (memberId) => {
+    try {
+      alert("해당 member가 삭제됩니다.");
+      await axiosInstance.delete(`/members/${memberId}`);
+      setMembers(members.filter((member) => member.id !== memberId));
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   // 대기 중일 때 (아직 데이터를 받아오지 못한 경우)
   if (loading) {
     return <MembersBlock>대기 중...</MembersBlock>;
@@ -129,10 +199,11 @@ const Members = () => {
                 <th>도시</th>
                 <th>거리</th>
                 <th>우편번호</th>
+                <th>삭제</th>
               </tr>
             </thead>
             <tbody>
-              <MemberList member={searchResult} />
+              <MemberList member={searchResult} onDelete={handleDelete} />
             </tbody>
           </table>
         )}
@@ -175,6 +246,50 @@ const Members = () => {
       </section>
 
       <section>
+        <h3>사용자 수정하기</h3>
+        <form onSubmit={handleUpdate}>
+          <input
+            name="memberId"
+            placeholder="사용자 ID"
+            value={updateMember.memberId}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="memberName"
+            placeholder="이름"
+            value={updateMember.memberName}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="address.city"
+            placeholder="도시"
+            value={updateMember.address.city}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="address.street"
+            placeholder="거리"
+            value={updateMember.address.street}
+            onChange={handleUpdateChange}
+            required
+          />
+          <input
+            name="address.zipcode"
+            placeholder="우편번호"
+            value={updateMember.address.zipcode}
+            onChange={handleUpdateChange}
+            type="number"
+            required
+          />
+          <button type="submit">사용자 수정하기</button>
+        </form>
+        {patchErrorMessage && <ErrorMessage>{patchErrorMessage}</ErrorMessage>}
+      </section>
+
+      <section>
         <h3>전체 사용자 리스트</h3>
         <table>
           <thead>
@@ -184,11 +299,16 @@ const Members = () => {
               <th>도시</th>
               <th>거리</th>
               <th>우편번호</th>
+              <th>삭제</th>
             </tr>
           </thead>
           <tbody>
             {members.map((member) => (
-              <MemberList key={member.id} member={member} />
+              <MemberList
+                key={member.id}
+                member={member}
+                onDelete={handleDelete}
+              />
             ))}
           </tbody>
         </table>
